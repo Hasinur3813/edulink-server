@@ -27,12 +27,10 @@ usersRoute.post("/signup", async (req, res, next) => {
 
 // user logout
 usersRoute.post("/logout", (req, res, next) => {
-  // const token = req?.cookies?.token;
   try {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
     });
     res.status(200).json({
       success: true,
@@ -44,7 +42,7 @@ usersRoute.post("/logout", (req, res, next) => {
 });
 
 // generate token
-usersRoute.get("/generate-token", async (req, res, next) => {
+usersRoute.post("/generate-token", async (req, res, next) => {
   try {
     const { email } = req.body;
 
@@ -54,7 +52,7 @@ usersRoute.get("/generate-token", async (req, res, next) => {
     if (!findUser) {
       return res.status(401).json({
         success: false,
-        message: "something went wrong!",
+        message: "user not found!",
       });
     }
 
@@ -68,7 +66,6 @@ usersRoute.get("/generate-token", async (req, res, next) => {
       .cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
       })
       .send({
         success: true,

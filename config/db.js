@@ -16,6 +16,7 @@ const database = client.db("edulink");
 
 async function connectDB(req, res) {
   try {
+    await client.connect();
     await database.command({ ping: 1 });
     console.log("mongodb connected");
   } catch (e) {
