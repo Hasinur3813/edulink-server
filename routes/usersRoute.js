@@ -67,7 +67,7 @@ usersRoute.post("/generate-token", async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
       })
-      .send({
+      .json({
         success: true,
         message: "token genereted",
       });

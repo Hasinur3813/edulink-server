@@ -6,7 +6,7 @@ const verifyToken = async (req, res, next) => {
   try {
     const token = req?.cookies?.token;
     if (!token) {
-      res.status(401).send({
+      return res.status(401).send({
         success: false,
         message: "Unauthorized access",
       });
