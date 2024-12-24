@@ -10,6 +10,13 @@ const usersCollection = database.collection("users");
 usersRoute.post("/signup", async (req, res, next) => {
   try {
     const user = req.body;
+    const isExistAlready = await usersCollection.findOne({ email: user.email });
+    if (isExistAlready) {
+      return res.status(403).send({
+        success: false,
+        message: "User is already registered",
+      });
+    }
     const hashedPassword = await bcrypt.hash(user.password, 10);
     const result = await usersCollection.insertOne({
       ...user,
@@ -25,6 +32,27 @@ usersRoute.post("/signup", async (req, res, next) => {
   }
 });
 
+// check if a user is available for google log in
+
+usersRoute.post("/google-login", async (req, res, next) => {
+  try {
+    const user = req.body;
+    const isExistUser = await usersCollection.findOne({ email: user.email });
+    if (isExistUser) {
+      return res.status(200).send({
+        success: true,
+        message: "Registered user",
+      });
+    }
+
+    res.status(401).send({
+      success: "false",
+      message: "Unauthorized access denied!",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 // user logout
 usersRoute.post("/logout", (req, res, next) => {
   try {

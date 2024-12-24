@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { database } from "../config/db.js";
 import verifyToken from "../middleware/verifyToken.js";
+import { ObjectId } from "mongodb";
 const secureRoute = express.Router();
 
 secureRoute.use(verifyToken);
@@ -36,6 +37,20 @@ secureRoute.get("/", async (req, res, next) => {
     const cursor = assignmetCollection.find();
     const assignment = await cursor.toArray();
     res.send(assignment);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// delete assignment
+
+secureRoute.post("/delete/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+
+    const result = await assignmetCollection.deleteOne(query);
+    res.send(result);
   } catch (error) {
     next(error);
   }
