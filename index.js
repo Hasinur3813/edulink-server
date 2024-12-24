@@ -19,7 +19,7 @@ app.use(
   })
 );
 
-connectDB();
+// connectDB();
 
 // define usersRoute
 app.use("/users", usersRoute);
