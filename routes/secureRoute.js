@@ -101,6 +101,67 @@ secureRoute.patch("/update-pending-assignment/:id", async (req, res, next) => {
   }
 });
 
+// get submited assignment by specific user
+
+secureRoute.get("/my-assignment/:email", async (req, res, next) => {
+  const email = req.params?.email;
+  console.log(email);
+  const query = { userEmail: email };
+  try {
+    const cursor = submissionCollection.find(query);
+    const assignments = await cursor.toArray();
+    res.send(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// get assignment by filter
+secureRoute.get("/filter", async (req, res, next) => {
+  const difficultyLevel = req.query;
+  try {
+    if (difficultyLevel?.difficulty === "all") {
+      const cursor = assignmetCollection.find();
+      const assignments = await cursor.toArray();
+      return res.send(assignments);
+    }
+
+    const query = { difficulty: difficultyLevel.difficulty };
+
+    const cursor = assignmetCollection.find(query);
+    const assignments = await cursor.toArray();
+    res.send(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// get assignment by user search
+
+secureRoute.get("/search", async (req, res, next) => {
+  const { search } = req.query;
+  if (!search) {
+    return res.status(404).send({
+      success: false,
+      message: "Search term is required!",
+    });
+  }
+  try {
+    const query = {
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ],
+    };
+
+    const cursor = assignmetCollection.find(query);
+    const assignment = await cursor.toArray();
+    res.send(assignment);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // get a single assignment
 secureRoute.post("/:id", async (req, res, next) => {
   try {
