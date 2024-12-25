@@ -7,6 +7,8 @@ const secureRoute = express.Router();
 const assignmetCollection = database.collection("assignments");
 const submissionCollection = database.collection("submission");
 
+secureRoute.use(verifyToken);
+
 // get all the assignments
 secureRoute.get("/", async (req, res, next) => {
   try {
@@ -17,8 +19,6 @@ secureRoute.get("/", async (req, res, next) => {
     next(error);
   }
 });
-
-secureRoute.use(verifyToken);
 
 // get all the pending assignment
 

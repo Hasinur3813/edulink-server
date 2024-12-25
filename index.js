@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { connectDB, database } from "./config/db.js";
 import usersRoute from "./routes/usersRoute.js";
 import secureRoute from "./routes/secureRoute.js";
+import path from "path";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -19,14 +20,14 @@ app.use(
   })
 );
 
-// connectDB();
+connectDB();
 
 // define usersRoute
 app.use("/users", usersRoute);
 app.use("/assignment", secureRoute);
 
 app.get("/", (req, res) => {
-  res.send("hello");
+  res.send("WelCome to EduLink API Home page.");
 });
 
 // handle no route found
