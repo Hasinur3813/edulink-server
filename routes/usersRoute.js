@@ -85,7 +85,7 @@ usersRoute.post("/generate-token", async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { name: findUser.name, id: findUser._id },
+      { id: findUser._id, name: findUser.name, email: findUser.email },
       process.env.JWT_SECRET,
       { expiresIn: "5h" }
     );

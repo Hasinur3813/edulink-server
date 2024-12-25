@@ -41,11 +41,15 @@ secureRoute.post("/create", async (req, res, next) => {
       dueDate: new Date(data.dueDate),
     };
     const result = await assignmetCollection.insertOne(assignment);
-    res.status(200).json({
-      success: true,
-      message: "Successfully created assignment",
-      result,
-    });
+    if (result.insertedId) {
+      res.send(result);
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "Something went wrong. Try later",
+        result,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -58,7 +62,16 @@ secureRoute.post("/delete/:id", async (req, res, next) => {
     const query = { _id: new ObjectId(id) };
 
     const result = await assignmetCollection.deleteOne(query);
-    res.send(result);
+
+    if (result.deletedCount > 0) {
+      res.send(result);
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "No matching assignment",
+        result,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -72,11 +85,15 @@ secureRoute.post("/submit-assignment", async (req, res, next) => {
       ...assignment,
       date: new Date(assignment.date),
     });
-    res.status(200).send({
-      success: true,
-      message: "Assignment submited successfully",
-      result,
-    });
+    if (result.insertedId) {
+      res.send(result);
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "Something went wrong. Try later",
+        result,
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -95,6 +112,7 @@ secureRoute.patch("/update-pending-assignment/:id", async (req, res, next) => {
     const result = await submissionCollection.replaceOne(query, assignment, {
       upsert: true,
     });
+
     res.send(result);
   } catch (error) {
     next(error);
@@ -105,7 +123,6 @@ secureRoute.patch("/update-pending-assignment/:id", async (req, res, next) => {
 
 secureRoute.get("/my-assignment/:email", async (req, res, next) => {
   const email = req.params?.email;
-  console.log(email);
   const query = { userEmail: email };
   try {
     const cursor = submissionCollection.find(query);
@@ -141,10 +158,9 @@ secureRoute.get("/filter", async (req, res, next) => {
 secureRoute.get("/search", async (req, res, next) => {
   const { search } = req.query;
   if (!search) {
-    return res.status(404).send({
-      success: false,
-      message: "Search term is required!",
-    });
+    const cursor = assignmetCollection.find();
+    const assignment = await cursor.toArray();
+    return res.send(assignment);
   }
   try {
     const query = {
@@ -162,6 +178,30 @@ secureRoute.get("/search", async (req, res, next) => {
   }
 });
 
+// update a specific assignment
+secureRoute.post("/update/:id", async (req, res, next) => {
+  const id = req.params.id;
+  const assignment = req.body;
+  try {
+    const query = { _id: new ObjectId(id) };
+
+    const result = await assignmetCollection.replaceOne(query, {
+      ...assignment,
+      dueDate: new Date(assignment.dueDate),
+    });
+    if (result.modifiedCount > 0) {
+      res.send(result);
+    } else {
+      res.status(404).send({
+        success: false,
+        message: "No matching assignment",
+        result,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 // get a single assignment
 secureRoute.post("/:id", async (req, res, next) => {
   try {
