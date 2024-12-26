@@ -45,10 +45,19 @@ usersRoute.post("/google-login", async (req, res, next) => {
       });
     }
 
-    res.status(401).send({
-      success: "false",
-      message: "Unauthorized access denied!",
-    });
+    const result = await usersCollection.insertOne(user);
+    if (result.insertedId) {
+      res.send({
+        success: true,
+        message: "Successfully registered",
+        result,
+      });
+    } else {
+      res.status(403).send({
+        success: false,
+        message: "Unauthorized user",
+      });
+    }
   } catch (error) {
     next(error);
   }
@@ -60,6 +69,7 @@ usersRoute.post("/logout", (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      maxAge: 0,
     });
     res.status(200).json({
       success: true,
@@ -73,23 +83,12 @@ usersRoute.post("/logout", (req, res, next) => {
 // generate token
 usersRoute.post("/generate-token", async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const user = req.body;
 
-    if (!email) return res.status(404).json({ message: "email is required!" });
+    if (!user)
+      return res.status(404).json({ message: "user data is required!" });
 
-    const findUser = await usersCollection.findOne({ email: email });
-    if (!findUser) {
-      return res.status(401).json({
-        success: false,
-        message: "user not found!",
-      });
-    }
-
-    const token = jwt.sign(
-      { id: findUser._id, name: findUser.name, email: findUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "5h" }
-    );
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: "10h" });
 
     res
       .cookie("token", token, {
@@ -97,7 +96,7 @@ usersRoute.post("/generate-token", async (req, res, next) => {
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       })
-      .json({
+      .send({
         success: true,
         message: "token genereted",
       });

@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import { connectDB, database } from "./config/db.js";
 import usersRoute from "./routes/usersRoute.js";
 import secureRoute from "./routes/secureRoute.js";
-import path from "path";
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -25,7 +24,6 @@ app.use(
 );
 
 connectDB();
-
 // define usersRoute
 app.use("/users", usersRoute);
 app.use("/assignment", secureRoute);
