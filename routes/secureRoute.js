@@ -7,8 +7,6 @@ const secureRoute = express.Router();
 const assignmetCollection = database.collection("assignments");
 const submissionCollection = database.collection("submission");
 
-secureRoute.use(verifyToken);
-
 // get all the assignments
 secureRoute.get("/", async (req, res, next) => {
   try {
@@ -19,6 +17,52 @@ secureRoute.get("/", async (req, res, next) => {
     next(error);
   }
 });
+// get assignment by filter
+secureRoute.get("/filter", async (req, res, next) => {
+  const difficultyLevel = req.query;
+  try {
+    if (difficultyLevel?.difficulty === "all") {
+      const cursor = assignmetCollection.find();
+      const assignments = await cursor.toArray();
+      return res.send(assignments);
+    }
+
+    const query = { difficulty: difficultyLevel.difficulty };
+
+    const cursor = assignmetCollection.find(query);
+    const assignments = await cursor.toArray();
+    res.send(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// get assignment by user search
+
+secureRoute.get("/search", async (req, res, next) => {
+  const { search } = req.query;
+  if (!search) {
+    const cursor = assignmetCollection.find();
+    const assignment = await cursor.toArray();
+    return res.send(assignment);
+  }
+  try {
+    const query = {
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ],
+    };
+
+    const cursor = assignmetCollection.find(query);
+    const assignment = await cursor.toArray();
+    res.send(assignment);
+  } catch (error) {
+    next(error);
+  }
+});
+
+secureRoute.use(verifyToken);
 
 // get all the pending assignment
 
@@ -128,51 +172,6 @@ secureRoute.get("/my-assignment/:email", async (req, res, next) => {
     const cursor = submissionCollection.find(query);
     const assignments = await cursor.toArray();
     res.send(assignments);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// get assignment by filter
-secureRoute.get("/filter", async (req, res, next) => {
-  const difficultyLevel = req.query;
-  try {
-    if (difficultyLevel?.difficulty === "all") {
-      const cursor = assignmetCollection.find();
-      const assignments = await cursor.toArray();
-      return res.send(assignments);
-    }
-
-    const query = { difficulty: difficultyLevel.difficulty };
-
-    const cursor = assignmetCollection.find(query);
-    const assignments = await cursor.toArray();
-    res.send(assignments);
-  } catch (error) {
-    next(error);
-  }
-});
-
-// get assignment by user search
-
-secureRoute.get("/search", async (req, res, next) => {
-  const { search } = req.query;
-  if (!search) {
-    const cursor = assignmetCollection.find();
-    const assignment = await cursor.toArray();
-    return res.send(assignment);
-  }
-  try {
-    const query = {
-      $or: [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ],
-    };
-
-    const cursor = assignmetCollection.find(query);
-    const assignment = await cursor.toArray();
-    res.send(assignment);
   } catch (error) {
     next(error);
   }

@@ -59,6 +59,7 @@ usersRoute.post("/logout", (req, res, next) => {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     });
     res.status(200).json({
       success: true,
@@ -94,6 +95,7 @@ usersRoute.post("/generate-token", async (req, res, next) => {
       .cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       })
       .json({
         success: true,

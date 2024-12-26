@@ -15,7 +15,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://edulink-5324d.web.app",
+      "https://edulink-5324d.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
