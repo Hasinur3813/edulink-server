@@ -17,6 +17,18 @@ secureRoute.get("/", async (req, res, next) => {
     next(error);
   }
 });
+
+// get assignments for homepage; 3 assignments
+
+secureRoute.get("/homepage-assignments", async (req, res, next) => {
+  try {
+    const cursor = assignmetCollection.find().limit(3);
+    const assignment = await cursor.toArray();
+    res.send(assignment);
+  } catch (error) {
+    next(error);
+  }
+});
 // get assignment by filter
 secureRoute.get("/filter", async (req, res, next) => {
   const difficultyLevel = req.query;
@@ -143,6 +155,21 @@ secureRoute.post("/submit-assignment", async (req, res, next) => {
   }
 });
 
+// get all the assignment by specific user
+
+secureRoute.get("/my-assignment/:email", async (req, res, next) => {
+  const { email } = req.params;
+
+  try {
+    const query = { email };
+
+    const assignments = await assignmetCollection.find(query).toArray();
+    res.status(200).send(assignments);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // update pending assignment
 
 secureRoute.patch("/update-pending-assignment/:id", async (req, res, next) => {
@@ -165,7 +192,7 @@ secureRoute.patch("/update-pending-assignment/:id", async (req, res, next) => {
 
 // get submited assignment by specific user
 
-secureRoute.get("/my-assignment/:email", async (req, res, next) => {
+secureRoute.get("/my-attempted-assignment/:email", async (req, res, next) => {
   const email = req.params?.email;
   const query = { userEmail: email };
   try {

@@ -2,12 +2,12 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { connectDB, database } from "./config/db.js";
+import { connectDB } from "./config/db.js";
 import usersRoute from "./routes/usersRoute.js";
 import secureRoute from "./routes/secureRoute.js";
 
 dotenv.config();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
